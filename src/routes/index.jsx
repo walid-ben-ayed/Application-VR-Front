@@ -1,9 +1,8 @@
 import * as React from 'react';
 import { Outlet } from 'react-router-dom';
 
-import { Page as HomePage } from '@/pages/marketing/home';
+import { Page as SignInPage } from '@/pages/auth/custom/sign-in';
 import { Page as NotFoundPage } from '@/pages/not-found';
-import { Layout as MarketingLayout } from '@/components/marketing/layout/layout';
 
 import { route as authRoute } from './auth';
 import { route as componentsRoute } from './components';
@@ -12,12 +11,14 @@ import { route as dashboardRoute } from './dashboard';
 export const routes = [
   {
     element: (
-      <MarketingLayout>
         <Outlet />
-      </MarketingLayout>
     ),
     children: [
-      { index: true, element: <HomePage /> },
+      { index: true, element: <SignInPage /> }, // Page de connexion par défaut
+      {
+        path: 'auth/custom/sign-in', // ➡ Ajout de la route spécifique
+        element: <SignInPage />,
+      },
       {
         path: 'pricing',
         lazy: async () => {

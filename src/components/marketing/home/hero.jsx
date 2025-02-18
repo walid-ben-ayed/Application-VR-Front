@@ -80,7 +80,7 @@ export function Hero() {
             <Button component={RouterLink} href={paths.dashboard.overview} variant="contained">
               Dashboard
             </Button>
-            <Button
+            {/*<Button
               component={RouterLink}
               href={paths.components.index}
               sx={{
@@ -89,7 +89,7 @@ export function Hero() {
               }}
             >
               Components
-            </Button>
+            </Button>*/}
           </Stack>
           <Stack direction="row" spacing={1} sx={{ alignItems: 'center', justifyContent: 'center ' }}>
             <AvatarGroup sx={{ '& .MuiAvatar-root': { border: '2px solid var(--mui-palette-neutral-950)' } }}>

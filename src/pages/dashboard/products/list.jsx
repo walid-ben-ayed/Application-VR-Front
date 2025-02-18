@@ -115,6 +115,22 @@ export function Page() {
             <div>
               <Button
                 component={RouterLink}
+                href="#"
+                sx={{ marginLeft: 1 }}
+                variant="contained"
+              >
+                loi
+              </Button>
+              <Button
+                component={RouterLink}
+                href="#"
+                sx={{ marginLeft: 1 }}
+                variant="contained"
+              >
+                code
+              </Button>
+              <Button
+                component={RouterLink}
                 href={paths.dashboard.products.create}
                 startIcon={<PlusIcon />}
                 variant="contained"
