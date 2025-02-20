@@ -35,12 +35,12 @@ export const layoutConfig = {
         },
         {
           key: 'products',
-          title: 'Products',
+          title: 'Base Réglementaire',
           icon: 'shopping-bag-open',
           items: [
-            { key: 'products', title: 'List products', href: paths.dashboard.products.list },
-            { key: 'products:create', title: 'Create product', href: paths.dashboard.products.create },
-            { key: 'products:details', title: 'Product details', href: paths.dashboard.products.details('1') },
+            { key: 'products', title: 'Liste textes réglementaires', href: paths.dashboard.products.list },
+            { key: 'products:create', title: 'Créer texte réglementaire ', href: paths.dashboard.products.create },
+            { key: 'products:details', title: 'Détails texte réglementaire', href: paths.dashboard.products.details('1') },
           ],
         },
         {

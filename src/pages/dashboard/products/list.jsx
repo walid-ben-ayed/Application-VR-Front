@@ -8,6 +8,8 @@ import Typography from '@mui/material/Typography';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
+import { LoiFormModal } from '@/components/widgets/modals/loi-form-modal';
+import { useState } from 'react';
 
 import { config } from '@/config';
 import { paths } from '@/paths';
@@ -89,6 +91,7 @@ const products = [
 ];
 
 export function Page() {
+  const [openLoiModal, setOpenLoiModal] = useState(false);
   const { category, previewId, sortDir, sku, status } = useExtractSearchParams();
 
   const orderedProducts = applySort(products, sortDir);
@@ -110,25 +113,9 @@ export function Page() {
         <Stack spacing={4}>
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={3} sx={{ alignItems: 'flex-start' }}>
             <Box sx={{ flex: '1 1 auto' }}>
-              <Typography variant="h4">Products</Typography>
+              <Typography variant="h4">Base Réglementaire</Typography>
             </Box>
-            <div>
-              <Button
-                component={RouterLink}
-                href="#"
-                sx={{ marginLeft: 1 }}
-                variant="contained"
-              >
-                loi
-              </Button>
-              <Button
-                component={RouterLink}
-                href="#"
-                sx={{ marginLeft: 1 }}
-                variant="contained"
-              >
-                code
-              </Button>
+            <Stack direction="row" spacing={2}>
               <Button
                 component={RouterLink}
                 href={paths.dashboard.products.create}
@@ -137,7 +124,26 @@ export function Page() {
               >
                 Add
               </Button>
-            </div>
+              <Button
+                variant="contained"
+                onClick={() => setOpenLoiModal(true)}
+              >
+                Loi-Décret-Article-Circulaire
+              </Button>
+              <LoiFormModal
+                open={openLoiModal}
+                onClose={() => setOpenLoiModal(false)}
+                onSubmit={(data) => {
+                  console.log('Form submitted:', data);
+                  // Handle form submission here
+                }}
+              />
+              <Button
+                variant="contained"
+              >
+                Code
+              </Button>
+            </Stack>
           </Stack>
           <Card>
             <ProductsFilters filters={{ category, sku, status }} sortDir={sortDir} />
