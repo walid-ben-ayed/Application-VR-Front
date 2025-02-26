@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { useDispatch } from 'react-redux';
-import { addLaw, fetchLois, updateLaw, getLawById, deleteLaw } from '@/Actions/LawActions';
+import { addCode, fetchCodes, updateCode, getCodeById, deleteCode } from '@/Actions/CodeActions';
+import { fetchLois } from '@/Actions/LawActions';
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import DialogContent from '@mui/material/DialogContent';
@@ -20,106 +21,118 @@ import TableRow from '@mui/material/TableRow';
 import { X as XIcon } from '@phosphor-icons/react/dist/ssr/X';
 import { toast } from '@/components/core/toaster';
 import { Trash2 } from "lucide-react";
-export function LoiFormModal({ open, onClose, onSubmit }) {
+
+export function CodeFormModal({ open, onClose, onSubmit }) {
   const dispatch = useDispatch();
   const [showList, setShowList] = React.useState(false);
   const [formData, setFormData] = React.useState({
-    type: '',
-    numLoi: '',
-    date: '',
-    nomLoi: '',
-    source: ''
+    nom: '',
+    nom_loi: ''
   });
+  const [codes, setCodes] = React.useState([]);
   const [lois, setLois] = React.useState([]);
-  const [selectedLawId, setSelectedLawId] = React.useState(null);
+  const [selectedCodeId, setSelectedCodeId] = React.useState(null);
   const [isEditing, setIsEditing] = React.useState(false);
+
   const handleChange = (event) => {
     setFormData({
       ...formData,
       [event.target.name]: event.target.value
     });
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     try {
-      if (isEditing && selectedLawId) {
-        // Update existing law
-        await updateLaw(selectedLawId, formData, dispatch);
-        toast.success("Loi modifiée avec succès");
+      if (isEditing && selectedCodeId) {
+        // Update existing code
+        await updateCode(selectedCodeId, formData, dispatch);
+        toast.success("Code modifié avec succès");
         setIsEditing(false);
-        setSelectedLawId(null);
+        setSelectedCodeId(null);
       } else {
-        // Create new law
-        await addLaw(formData, dispatch);
-        toast.success("Loi créée avec succès");
+        // Create new code
+        await addCode(formData, dispatch);
+        toast.success("Code créé avec succès");
       }
       
       onSubmit?.(formData);
       // Reset form
       setFormData({
-        type: '',
-        numLoi: '',
-        date: '',
-        nomLoi: '',
-        source: ''
+        nom: '',
+        nom_loi: ''
       });
       
       // Refresh the list
       if (!showList) {
         setShowList(true);
       } else {
-        const updatedLois = await fetchLois(dispatch);
-        setLois(updatedLois);
+        const updatedCodes = await fetchCodes(dispatch);
+        setCodes(updatedCodes);
       }
     } catch (error) {
       toast.error(isEditing ? "Échec de la modification" : "Échec de la création");
-      console.error('Error submitting law:', error);
+      console.error('Error submitting code:', error);
     }
   };
-  const handleEdit = async (lawId) => {
+
+  const handleEdit = async (codeId) => {
     try {
-      const lawData = await getLawById(lawId, dispatch);
+      const codeData = await getCodeById(codeId, dispatch);
       setFormData({
-        type: lawData.type,
-        numLoi: lawData.numero,
-        date: lawData.date,
-        nomLoi: lawData.nom,
-        source: lawData.source
+        nom: codeData.nom,
+        nom_loi: codeData.nom_loi
       });
-      setSelectedLawId(lawId);
+      setSelectedCodeId(codeId);
       setIsEditing(true);
       setShowList(false);
     } catch (error) {
-      toast.error("Échec du chargement de la loi");
-      console.error('Error fetching law:', error);
+      toast.error("Échec du chargement du code");
+      console.error('Error fetching code:', error);
     }
   };
-  const handleDelete = async (lawId) => {
+
+  const handleDelete = async (codeId) => {
     try {
-      // Assuming you have a deleteLaw action
-      await deleteLaw(lawId, dispatch);
-      toast.success("Loi supprimée avec succès");
-      const updatedLois = await fetchLois(dispatch);
-      setLois(updatedLois);
+      await deleteCode(codeId, dispatch);
+      toast.success("Code supprimé avec succès");
+      const updatedCodes = await fetchCodes(dispatch);
+      setCodes(updatedCodes);
     } catch (error) {
       toast.error("Échec de la suppression");
-      console.error('Error deleting law:', error);
+      console.error('Error deleting code:', error);
     }
   };
+
   const handleToggleView = () => {
     setShowList(!showList);
     if (isEditing) {
       setIsEditing(false);
-      setSelectedLawId(null);
+      setSelectedCodeId(null);
       setFormData({
-        type: '',
-        numLoi: '',
-        date: '',
-        nomLoi: '',
-        source: ''
+        nom: '',
+        nom_loi: ''
       });
     }
   };
+
+  // Fetch codes for the list view
+  React.useEffect(() => {
+    const getCodes = async () => {
+      try {
+        const data = await fetchCodes(dispatch);
+        setCodes(data);
+      } catch (error) {
+        console.error('Error fetching codes:', error);
+        toast.error("Échec du chargement des codes");
+      }
+    };
+    if (showList) {
+      getCodes();
+    }
+  }, [showList, dispatch]);
+
+  // Fetch lois for the dropdown
   React.useEffect(() => {
     const getLois = async () => {
       try {
@@ -130,10 +143,13 @@ export function LoiFormModal({ open, onClose, onSubmit }) {
         toast.error("Échec du chargement des lois");
       }
     };
-    if (showList) {
+    
+    // Fetch lois when component mounts or when showing the form
+    if (!showList) {
       getLois();
     }
   }, [showList, dispatch]);
+
   return (
     <Dialog 
       fullWidth
@@ -144,11 +160,11 @@ export function LoiFormModal({ open, onClose, onSubmit }) {
       <DialogContent>
         <Stack direction="row" sx={{ alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
           <Typography variant="h6">
-            {showList ? 'Liste de lois' : isEditing ? 'Modifier Loi' : 'Nouvelle Loi'}
+            {showList ? 'Liste des codes' : isEditing ? 'Modifier Code' : 'Nouveau Code'}
           </Typography>
           <Stack direction="row" spacing={2}>
             <Button variant="outlined" onClick={handleToggleView}>
-              {showList ? 'Nouveau' : 'Liste Loi'}
+              {showList ? 'Nouveau' : 'Liste Code'}
             </Button>
             <IconButton onClick={onClose}>
               <XIcon />
@@ -159,31 +175,29 @@ export function LoiFormModal({ open, onClose, onSubmit }) {
           <Table>
             <TableHead>
               <TableRow>
-                <TableCell>Titre</TableCell>
-                <TableCell>Source</TableCell>
-                <TableCell>Date</TableCell>
+                <TableCell>Nom</TableCell>
+                <TableCell>Nom de Loi</TableCell>
                 <TableCell>Action</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              {lois.map((loi) => (
-                <TableRow key={loi.id_loi}>
-                  <TableCell>{loi.titre}</TableCell>
-                  <TableCell>{loi.source}</TableCell>
-                  <TableCell>{loi.date}</TableCell>
+              {codes.map((code) => (
+                <TableRow key={code.id_code}>
+                  <TableCell>{code.nom}</TableCell>
+                  <TableCell>{code.nom_loi}</TableCell>
                   <TableCell>
                     <Stack direction="row" spacing={1}>
                       <Button
                         variant="contained"
                         color="primary"
-                        onClick={() => handleEdit(loi.id_loi)}
+                        onClick={() => handleEdit(code.id_code)}
                       >
                         Edit
                       </Button>
                       <Button
                         variant="contained"
                         color="error"
-                        onClick={() => handleDelete(loi.id_loi)}
+                        onClick={() => handleDelete(code.id_code)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -196,54 +210,28 @@ export function LoiFormModal({ open, onClose, onSubmit }) {
         ) : (
           <form onSubmit={handleSubmit}>
             <Stack spacing={3}>
-              <FormControl fullWidth>
-                <InputLabel>Type</InputLabel>
+              <TextField
+                fullWidth
+                label="Nom du code"
+                name="nom"
+                value={formData.nom}
+                onChange={handleChange}
+                required
+              />
+              <FormControl fullWidth required>
+                <InputLabel>Nom de loi</InputLabel>
                 <Select
-                  name="type"
-                  value={formData.type}
+                  name="nom_loi"
+                  value={formData.nom_loi}
                   onChange={handleChange}
-                  required
                 >
-                  <MenuItem value="loi">Loi</MenuItem>
-                  <MenuItem value="decret">Decret</MenuItem>
-                  <MenuItem value="arret">Arret</MenuItem>
+                  {lois.map((loi) => (
+                    <MenuItem key={loi.id_loi} value={loi.nom}>
+                      {loi.nom}
+                    </MenuItem>
+                  ))}
                 </Select>
               </FormControl>
-              <TextField
-                fullWidth
-                label="Num de loi"
-                name="numLoi"
-                type="number"
-                value={formData.numLoi}
-                onChange={handleChange}
-                required
-              />
-              <TextField
-                fullWidth
-                label="Date"
-                name="date"
-                type="date"
-                value={formData.date}
-                onChange={handleChange}
-                required
-                InputLabelProps={{ shrink: true }}
-              />
-              <TextField
-                fullWidth
-                label="Nom de loi"
-                name="nomLoi"
-                value={formData.nomLoi}
-                onChange={handleChange}
-                required
-              />
-              <TextField
-                fullWidth
-                label="Source"
-                name="source"
-                value={formData.source}
-                onChange={handleChange}
-                required
-              />
               <Button
                 fullWidth
                 size="large"

@@ -35,6 +35,24 @@ export const fetchLois = async (dispatch) => {
       throw error;
     }
   };
+
+
+  export const deleteLaw = async (id, dispatch) => {
+    try {
+        const token = localStorage.getItem(TOKEN);
+        await axios.delete(`http://localhost:9090/api/loi/${id}`, {
+            headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        dispatch(UiActions.setIsSuccess("Loi supprimée avec succès"));
+    } catch (error) {
+        dispatch(UiActions.setIsError("Échec de la suppression de la loi"));
+        throw error;
+    }
+  };
+
   
   export const updateLaw = async (id, lawData, dispatch) => {
     try {

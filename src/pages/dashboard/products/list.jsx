@@ -19,6 +19,7 @@ import { ProductModal } from '@/components/dashboard/product/product-modal';
 import { ProductsFilters } from '@/components/dashboard/product/products-filters';
 import { ProductsPagination } from '@/components/dashboard/product/products-pagination';
 import { ProductsTable } from '@/components/dashboard/product/products-table';
+import { CodeFormModal } from '@/components/widgets/modals/code-form-modal';
 
 const metadata = { title: `List | Products | Dashboard | ${config.site.name}` };
 
@@ -92,6 +93,7 @@ const products = [
 
 export function Page() {
   const [openLoiModal, setOpenLoiModal] = useState(false);
+  const [openCodeModal, setOpenCodeModal] = React.useState(false);
   const { category, previewId, sortDir, sku, status } = useExtractSearchParams();
 
   const orderedProducts = applySort(products, sortDir);
@@ -140,9 +142,18 @@ export function Page() {
               />
               <Button
                 variant="contained"
+                onClick={() => setOpenCodeModal(true)}
               >
                 Code
               </Button>
+              <CodeFormModal
+                open={openCodeModal}
+                onClose={() => setOpenCodeModal(false)}
+                onSubmit={(data) => {
+                  console.log('Code form submitted:', data);
+                  // Handle code form submission here
+                }}
+              />
             </Stack>
           </Stack>
           <Card>
