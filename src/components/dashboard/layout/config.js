@@ -7,9 +7,9 @@ export const layoutConfig = {
       title: 'Dashboards',
       items: [
         { key: 'overview', title: 'Overview', href: paths.dashboard.overview, icon: 'house' },
-        { key: 'analytics', title: 'Analytics', href: paths.dashboard.analytics, icon: 'chart-pie' },
+        /*{ key: 'analytics', title: 'Analytics', href: paths.dashboard.analytics, icon: 'chart-pie' },
         { key: 'ecommerce', title: 'E-commerce', href: paths.dashboard.eCommerce, icon: 'cube' },
-        { key: 'crypto', title: 'Crypto', href: paths.dashboard.crypto, icon: 'currency-eth' },
+        { key: 'crypto', title: 'Crypto', href: paths.dashboard.crypto, icon: 'currency-eth' },*/
       ],
     },
     {
@@ -35,12 +35,12 @@ export const layoutConfig = {
         },
         {
           key: 'products',
-          title: 'Products',
+          title: 'Base Réglementaire',
           icon: 'shopping-bag-open',
           items: [
-            { key: 'products', title: 'List products', href: paths.dashboard.products.list },
-            { key: 'products:create', title: 'Create product', href: paths.dashboard.products.create },
-            { key: 'products:details', title: 'Product details', href: paths.dashboard.products.details('1') },
+            { key: 'products', title: 'Liste textes réglementaires', href: paths.dashboard.products.list },
+            { key: 'products:create', title: 'Créer texte réglementaire ', href: paths.dashboard.products.create },
+            { key: 'products:details', title: 'Détails texte réglementaire', href: paths.dashboard.products.details('1') },
           ],
         },
         {
