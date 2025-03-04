@@ -38,11 +38,11 @@ export function Page() {
                 variant="subtitle2"
               >
                 <ArrowLeftIcon fontSize="var(--icon-fontSize-md)" />
-                Products
+                Aricles
               </Link>
             </div>
             <div>
-              <Typography variant="h4">Create product</Typography>
+              <Typography variant="h4">Create Aricle</Typography>
             </div>
           </Stack>
           <ProductCreateForm />

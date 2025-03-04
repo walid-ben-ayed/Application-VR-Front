@@ -9,7 +9,7 @@ export const layoutConfig = {
         { key: 'overview', title: 'Overview', href: paths.dashboard.overview, icon: 'house' },
         /*{ key: 'analytics', title: 'Analytics', href: paths.dashboard.analytics, icon: 'chart-pie' },
         { key: 'ecommerce', title: 'E-commerce', href: paths.dashboard.eCommerce, icon: 'cube' },
-        { key: 'crypto', title: 'Crypto', href: paths.dashboard.crypto, icon: 'currency-eth' },*/
+        { key: 'crypto', title: 'Crypto', href: paths.dashboard.crypto, icon: 'currency-eth' },*/ 
       ],
     },
     {
@@ -23,7 +23,7 @@ export const layoutConfig = {
           icon: 'gear',
           matcher: { type: 'startsWith', href: '/dashboard/settings' },
         },
-        {
+        /*{
           key: 'customers',
           title: 'Customers',
           icon: 'users',
@@ -32,7 +32,7 @@ export const layoutConfig = {
             { key: 'customers:create', title: 'Create customer', href: paths.dashboard.customers.create },
             { key: 'customers:details', title: 'Customer details', href: paths.dashboard.customers.details('1') },
           ],
-        },
+        },*/
         {
           key: 'products',
           title: 'Base Réglementaire',
@@ -43,7 +43,7 @@ export const layoutConfig = {
             { key: 'products:details', title: 'Détails texte réglementaire', href: paths.dashboard.products.details('1') },
           ],
         },
-        {
+        /*{
           key: 'orders',
           title: 'Orders',
           icon: 'shopping-cart-simple',
@@ -136,7 +136,7 @@ export const layoutConfig = {
           matcher: { type: 'startsWith', href: '/dashboard/chat' },
         },
         { key: 'calendar', title: 'Calendar', href: paths.dashboard.calendar, icon: 'calendar-check' },
-        { key: 'tasks', title: 'Tasks', href: paths.dashboard.tasks, icon: 'kanban' },
+        { key: 'tasks', title: 'Tasks', href: paths.dashboard.tasks, icon: 'kanban' },*/
       ],
     },
     {
