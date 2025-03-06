@@ -156,7 +156,7 @@ export function Page() {
               />
             </Stack>
           </Stack>
-          {/*<Card>
+          <Card>
             <ProductsFilters filters={{ category, sku, status }} sortDir={sortDir} />
             <Divider />
             <Box sx={{ overflowX: 'auto' }}>
@@ -164,7 +164,7 @@ export function Page() {
             </Box>
             <Divider />
             <ProductsPagination count={filteredProducts.length} page={0} />
-          </Card>*/}
+          </Card>
         </Stack>
       </Box>
       <ProductModal open={Boolean(previewId)} />

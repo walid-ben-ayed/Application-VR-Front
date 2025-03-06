@@ -86,6 +86,7 @@ export const fetchLois = async (dispatch) => {
 
 export const addLaw = async (lawData, dispatch) => {
   try {
+    console.log(lawData);
     const token = localStorage.getItem(TOKEN);
     const response = await axios.post('http://localhost:9090/api/loi', {
       nom: lawData.nomLoi,
@@ -94,7 +95,6 @@ export const addLaw = async (lawData, dispatch) => {
       date: lawData.date,
       source: lawData.source,
       titre: ""
-      
     },
     {
         headers: {
