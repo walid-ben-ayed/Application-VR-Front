@@ -16,7 +16,7 @@ import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { UiActions } from "@/Slice/UiSlice";
-import { addTexteReglementaire } from '@/Actions/TexteReglementaireActions';
+import { addTexteReglementaire, updateTexteReglementaire, getTexteReglementaireById } from '@/Actions/TexteReglementaireActions';
 import { useDispatch } from 'react-redux';
 import { paths } from '@/paths';
 import { TextEditor } from '@/components/core/text-editor/text-editor';
@@ -27,10 +27,11 @@ import { File as FileIcon } from '@phosphor-icons/react/dist/ssr/File';
 import Avatar from '@mui/material/Avatar';
 import CircularProgress from '@mui/material/CircularProgress';
 
-export function ProductCreateForm() {
+export function ProductCreateForm({ isEditing, editId }) { // Added props for editing
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [loadingTexteData, setLoadingTexteData] = useState(false); // Added state for loading texte data
   const [formData, setFormData] = useState({
     loiTitre: '',
     codeNom: '',
@@ -65,6 +66,48 @@ export function ProductCreateForm() {
     fetchLawsAndCodes();
   }, [dispatch]);
 
+  // Load TexteReglementaire data for editing if needed
+  useEffect(() => {
+    const fetchTexteData = async () => {
+      if (isEditing && editId) {
+        setLoadingTexteData(true);
+        try {
+          const texteData = await getTexteReglementaireById(editId, dispatch);
+          if (texteData) {
+            setFormData({
+              loiTitre: texteData.loiTitre || '',
+              codeNom: texteData.codeNom || '',
+              numeroArticle: texteData.numeroArticle?.toString() || '',
+              champApplication: texteData.champApplication || '',
+              texteResume: texteData.texteResume || '',
+              texte: texteData.texte || '',
+              pieceJointe: texteData.pieceJointe || null,
+              version: texteData.version || 1
+            });
+
+            // If there's a piece jointe, we need to create a file object for display
+            if (texteData.pieceJointe) {
+              // Create a mock file object for display purposes
+              const mockFile = new File(
+                [""], 
+                "pièce-jointe." + (texteData.pieceJointe.includes("data:application/pdf") ? "pdf" : "docx"), 
+                { type: "application/octet-stream" }
+              );
+              setSelectedFile(mockFile);
+            }
+          }
+        } catch (error) {
+          console.error("Error fetching TexteReglementaire data:", error);
+          dispatch(UiActions.setIsError("Erreur lors du chargement des données du texte réglementaire"));
+        } finally {
+          setLoadingTexteData(false);
+        }
+      }
+    };
+
+    fetchTexteData();
+  }, [isEditing, editId, dispatch]);
+
   const handleFileDrop = (acceptedFiles) => {
     if (acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
@@ -90,7 +133,7 @@ export function ProductCreateForm() {
       ...prevState,
       [name]: value
     }));
-    
+
     // Clear validation error for this field when user edits it
     if (validationErrors[name]) {
       setValidationErrors(prev => ({
@@ -106,7 +149,7 @@ export function ProductCreateForm() {
       ...prevState,
       [field]: htmlContent
     }));
-    
+
     // Clear validation error for this field when user edits it
     if (validationErrors[field]) {
       setValidationErrors(prev => ({
@@ -118,7 +161,7 @@ export function ProductCreateForm() {
 
   const validateForm = () => {
     const errors = {};
-    
+
     // Required fields validation
     if (!formData.loiTitre) errors.loiTitre = "Le titre de la loi est requis";
     if (!formData.codeNom) errors.codeNom = "Le nom du code est requis";
@@ -126,7 +169,7 @@ export function ProductCreateForm() {
     if (!formData.champApplication) errors.champApplication = "Le champ d'application est requis";
     if (!formData.texteResume) errors.texteResume = "Le résumé du texte est requis";
     if (!formData.texte) errors.texte = "Le texte complet est requis";
-    
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -148,51 +191,46 @@ export function ProductCreateForm() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       dispatch(UiActions.setIsError("Veuillez remplir tous les champs obligatoires"));
       return;
     }
-    
+
     setLoading(true);
-    
+
     try {
       // Create a copy of form data for submission
-      const submitData = {
-        loiTitre: formData.loiTitre,
-        codeNom: formData.codeNom,
-        champApplication: formData.champApplication,
-        texteResume: formData.texteResume,
-        texte: formData.texte,
-        numeroArticle: parseInt(formData.numeroArticle),
-        version: 1,
-        pieceJointe: null
-      };
+      const submitData = { ...formData };
 
-      console.log("hethi data",submitData);
-      
       // If a file is selected, convert it to base64 for sending
       if (formData.pieceJointe instanceof File) {
         const base64String = await convertFileToBase64(formData.pieceJointe);
         submitData.pieceJointe = base64String;
       }
 
+      let result;
+
       // Call the API to save the data
-      const result = await addTexteReglementaire(submitData, dispatch);
-      
+      if (isEditing && editId) {
+        // Update existing TexteReglementaire
+        result = await updateTexteReglementaire(editId, submitData, dispatch);
+      } else {
+        // Create new TexteReglementaire
+        result = await addTexteReglementaire(submitData, dispatch);
+      }
+
       if (result) {
-        // No need to dispatch success message here as it's already handled in the action
         navigate(paths.dashboard.products.list);
       }
     } catch (error) {
-      console.error("Erreur lors de la création du texte réglementaire:", error);
-      // No need to dispatch error message here as it's already handled in the action
+      console.error(isEditing ? "Erreur lors de la modification du texte réglementaire:" : "Erreur lors de la création du texte réglementaire:", error);
     } finally {
       setLoading(false);
     }
   };
 
-  if (isLoadingData) {
+  if (isLoadingData || loadingTexteData) { // Added loadingTexteData to loading condition
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
@@ -411,7 +449,7 @@ export function ProductCreateForm() {
             disabled={loading}
             startIcon={loading && <CircularProgress size={20} color="inherit" />}
           >
-            {loading ? "Création en cours..." : "Créer le texte réglementaire"}
+            {loading ? "Enregistrement..." : (isEditing ? "Modifier" : "Créer le texte réglementaire")} {/*Updated button text for editing*/}
           </Button>
         </Box>
       </Stack>

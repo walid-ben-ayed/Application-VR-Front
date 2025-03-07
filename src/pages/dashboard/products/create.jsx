@@ -5,19 +5,33 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { ArrowLeft as ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/ArrowLeft';
 import { Helmet } from 'react-helmet-async';
+import { useSearchParams } from 'react-router-dom';
 
 import { config } from '@/config';
 import { paths } from '@/paths';
 import { RouterLink } from '@/components/core/link';
 import { ProductCreateForm } from '@/components/dashboard/product/product-create-form';
 
+
+
 const metadata = { title: `Create | Products | Dashboard | ${config.site.name}` };
 
+function useExtractSearchParams() {
+  const [searchParams] = useSearchParams();
+
+  return {
+    previewId: searchParams.get('previewId') || undefined,
+    editId: searchParams.get('edit') || undefined,
+  };
+}
+
 export function Page() {
+  const { editId } = useExtractSearchParams();
+  const isEditing = Boolean(editId);
   return (
     <React.Fragment>
       <Helmet>
-        <title>{metadata.title}</title>
+        <title>{isEditing ? 'Modifier le texte réglementaire' : metadata.title}</title>
       </Helmet>
       <Box
         sx={{
@@ -42,10 +56,12 @@ export function Page() {
               </Link>
             </div>
             <div>
-              <Typography variant="h4">Create Aricle</Typography>
+              <Typography variant="h4">
+                {isEditing ? "Modifier le texte réglementaire" : "Créer un texte réglementaire"}
+              </Typography>
             </div>
           </Stack>
-          <ProductCreateForm />
+          <ProductCreateForm isEditing={isEditing} editId={editId} />
         </Stack>
       </Box>
     </React.Fragment>

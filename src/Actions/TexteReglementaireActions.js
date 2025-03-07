@@ -1,6 +1,7 @@
 import { UiActions } from "../Slice/UiSlice";
 import axios from 'axios';
 import { TOKEN } from "@/Constants";
+import { toast } from '@/components/core/toaster';
 
 export const fetchTexteReglementaire = async (dispatch) => {
   try {
@@ -44,11 +45,13 @@ export const deleteTexteReglementaire = async (id, dispatch) => {
       }
     });
     if (response.status === 200) {
+      toast.success("Texte réglementaire supprimé avec succès");
       dispatch(UiActions.setIsSuccess("Texte réglementaire supprimé avec succès"));
       return true;
     }
   } catch (error) {
     dispatch(UiActions.setIsError("Échec de la suppression du texte réglementaire"));
+    toast.error("Échec de supprimé du texte réglementaire");
     throw error;
   }
 };
@@ -74,10 +77,12 @@ export const updateTexteReglementaire = async (id, data, dispatch) => {
 
     if (response.data) {
       dispatch(UiActions.setIsSuccess("Texte réglementaire mis à jour avec succès"));
+      toast.success("Texte réglementaire mis à jour avec succès");
       return response.data;
     }
   } catch (error) {
     dispatch(UiActions.setIsError("Échec de la mise à jour du texte réglementaire"));
+    toast.error("Échec de la mise à jour du texte réglementaire");
     throw error;
   }
 };
@@ -85,8 +90,6 @@ export const updateTexteReglementaire = async (id, data, dispatch) => {
 export const addTexteReglementaire = async (data, dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
-    console.log("data",data);
-    console.log("Token utilisé pour la requête:", token ? "Token présent" : "Token absent");
     const response = await axios.post('http://localhost:9090/api/texteReglementaire', {
       loiTitre: data.loiTitre,
       codeNom: data.codeNom,
@@ -105,10 +108,12 @@ export const addTexteReglementaire = async (data, dispatch) => {
 
     if (response.data) {
       dispatch(UiActions.setIsSuccess("Texte réglementaire créé avec succès"));
+      toast.success("Texte réglementaire créé avec succès");
       return response.data;
     }
   } catch (error) {
     dispatch(UiActions.setIsError("Échec de la création du texte réglementaire"));
+    toast.error("Échec de la création du texte réglementaire");
     throw error;
   }
 };
