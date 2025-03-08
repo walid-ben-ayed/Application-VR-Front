@@ -40,8 +40,8 @@ export const layoutConfig = {
           items: [
             { key: 'products', title: 'Liste textes réglementaires', href: paths.dashboard.products.list },
             { key: 'products:create', title: 'Créer texte réglementaire ', href: paths.dashboard.products.create },
-            { key: 'products:details', title: 'Détails texte réglementaire', href: paths.dashboard.products.details('1') },
-          ],
+            { key: 'products:details', title: 'Versions texte réglementaire', href: paths.dashboard.products.details('1') },
+          ],  
         },
         /*{
           key: 'orders',

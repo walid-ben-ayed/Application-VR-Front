@@ -6,6 +6,8 @@ import Typography from '@mui/material/Typography';
 import { ArrowLeft as ArrowLeftIcon } from '@phosphor-icons/react/dist/ssr/ArrowLeft';
 import { Helmet } from 'react-helmet-async';
 import { useSearchParams } from 'react-router-dom';
+import IconButton from '@mui/material/IconButton';
+import AddIcon from '@mui/icons-material/Add';
 
 import { config } from '@/config';
 import { paths } from '@/paths';
@@ -22,16 +24,17 @@ function useExtractSearchParams() {
   return {
     previewId: searchParams.get('previewId') || undefined,
     editId: searchParams.get('edit') || undefined,
+    isNewVersion: searchParams.get('newVersion') === 'true', // Added isNewVersion
   };
 }
 
 export function Page() {
-  const { editId } = useExtractSearchParams();
+  const { editId, isNewVersion } = useExtractSearchParams();
   const isEditing = Boolean(editId);
   return (
     <React.Fragment>
       <Helmet>
-        <title>{isEditing ? 'Modifier le texte réglementaire' : metadata.title}</title>
+        <title>{isEditing || isNewVersion ? 'Nouvelle Version' : metadata.title}</title> {/* Updated title */}
       </Helmet>
       <Box
         sx={{
@@ -57,11 +60,15 @@ export function Page() {
             </div>
             <div>
               <Typography variant="h4">
-                {isEditing ? "Modifier le texte réglementaire" : "Créer un texte réglementaire"}
+                {isEditing || isNewVersion ? "Nouvelle Version" : "Créer un texte réglementaire"} {/* Updated title */}
               </Typography>
+              {/* Added "Nouveau Version" button */}
+              <IconButton aria-label="add" href={`${window.location.href}?newVersion=true`}>
+                <AddIcon />
+              </IconButton>
             </div>
           </Stack>
-          <ProductCreateForm isEditing={isEditing} editId={editId} />
+          <ProductCreateForm isEditing={isEditing} editId={editId} isNewVersion={isNewVersion} />
         </Stack>
       </Box>
     </React.Fragment>

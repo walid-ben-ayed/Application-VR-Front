@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -14,7 +13,6 @@ import { useState, useEffect } from 'react';
 import { TextT as TextFormatIcon } from '@phosphor-icons/react/dist/ssr/TextT';
 import { FileText as FileTextIcon } from '@phosphor-icons/react/dist/ssr/FileText';
 import { PaperclipHorizontal as PaperclipIcon } from '@phosphor-icons/react/dist/ssr/PaperclipHorizontal';
-import { DownloadSimple as DownloadIcon } from '@phosphor-icons/react/dist/ssr/DownloadSimple';
 import { PencilSimple } from '@phosphor-icons/react/dist/ssr/PencilSimple';
 import { TrashSimple } from '@phosphor-icons/react/dist/ssr/TrashSimple';
 import { useDispatch } from 'react-redux';
@@ -81,18 +79,19 @@ export function Page() {
   };
 
   // Handler for editing a TexteReglementaire
-  const handleEditTexte = async (id) => {
+  const handleEditTexte = async (id, isNewVersion = false) => {
     try {
-      console.log("Editing texte with ID:", id);
+      console.log("Editing texte with ID:", id, "New version:", isNewVersion);
       if (!id) {
         dispatch(UiActions.setIsError("ID du texte réglementaire manquant"));
         return;
       }
-      
+
       const texteData = await getTexteReglementaireById(id, dispatch);
       if (texteData) {
         // Navigate to create page with the data for editing
-        navigate(`${paths.dashboard.products.create}?edit=${id}`);
+        // Pass additional parameter for new version if needed
+        navigate(`${paths.dashboard.products.create}?edit=${id}${isNewVersion ? '&newVersion=true' : ''}`);
       }
     } catch (error) {
       console.error('Error fetching texte reglementaire for edit:', error);
@@ -119,21 +118,21 @@ export function Page() {
 
   const handleDownloadAttachment = (base64Data, fileName) => {
     if (!base64Data) return;
-    
+
     try {
       // Extract file type from base64 string
       let fileExtension = 'pdf'; // Default to PDF for backward compatibility
       let mimeType = 'application/pdf';
       let dataForBlob = base64Data;
-      
+
       // Check if it's a data URL
       if (base64Data.startsWith('data:')) {
         const match = base64Data.match(/^data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+);base64,/);
-        
+
         if (match && match.length > 1) {
           mimeType = match[1];
           dataForBlob = base64Data.split(',')[1];
-          
+
           // Map MIME types to extensions - focusing on PDF and DOCX
           if (mimeType === 'application/pdf') {
             fileExtension = 'pdf';
@@ -151,7 +150,7 @@ export function Page() {
         }
       } else {
         // Handle raw base64 data by checking for magic bytes
-        
+
         // PDF Magic Bytes: %PDF- (JVBERi in base64)
         if (base64Data.startsWith('JVBERi')) {
           fileExtension = 'pdf';
@@ -164,7 +163,7 @@ export function Page() {
           const originalExt = fileName.split('.').pop();
           if (originalExt && ['docx', 'xlsx', 'pptx'].includes(originalExt.toLowerCase())) {
             fileExtension = originalExt.toLowerCase();
-            
+
             // Set appropriate MIME type
             const mimeMap = {
               'docx': 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
@@ -184,7 +183,7 @@ export function Page() {
           if (originalExt && originalExt.length > 0 && originalExt.length < 5) {
             const lowerExt = originalExt.toLowerCase();
             fileExtension = lowerExt;
-            
+
             // Basic MIME type mapping
             const extToMime = {
               'pdf': 'application/pdf',
@@ -202,32 +201,32 @@ export function Page() {
       // Create a base filename without extension
       let baseName = fileName.split('.').slice(0, -1).join('.');
       if (!baseName) baseName = fileName; // If no dots in filename, use the whole filename
-      
+
       // Create a safe filename
       let safeFileName = baseName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
-      
+
       // Add the determined extension
       const fullFileName = `${safeFileName}.${fileExtension}`;
       console.log('Using filename:', fullFileName);
-      
+
       // Convert base64 to blob
       const byteString = atob(dataForBlob);
       const ab = new ArrayBuffer(byteString.length);
       const ia = new Uint8Array(ab);
-      
+
       for (let i = 0; i < byteString.length; i++) {
         ia[i] = byteString.charCodeAt(i);
       }
-      
+
       const blob = new Blob([ab], { type: mimeType });
-      
+
       // Create download link
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
       link.download = fullFileName;
       document.body.appendChild(link);
       link.click();
-      
+
       // Clean up
       document.body.removeChild(link);
       setTimeout(() => URL.revokeObjectURL(link.href), 100);
@@ -314,11 +313,11 @@ export function Page() {
                   <TableBody>
                     {loading ? (
                       <TableRow>
-                        <TableCell colSpan={7} align="center">Chargement des données...</TableCell>
+                        <TableCell colSpan={9} align="center">Chargement des données...</TableCell>
                       </TableRow>
                     ) : texteReglementaires.length === 0 ? (
                       <TableRow>
-                        <TableCell colSpan={7} align="center">Aucun texte réglementaire trouvé</TableCell>
+                        <TableCell colSpan={9} align="center">Aucun texte réglementaire trouvé</TableCell>
                       </TableRow>
                     ) : (
                       texteReglementaires.map((texte, index) => (
@@ -327,7 +326,24 @@ export function Page() {
                           <TableCell>{texte.codeNom}</TableCell>
                           <TableCell>{texte.champApplication}</TableCell>
                           <TableCell>{texte.numeroArticle}</TableCell>
-                          <TableCell>{texte.version}</TableCell>
+                          <TableCell>
+                            <Stack direction="row" spacing={1}>
+                              <IconButton
+                                color="success"
+                                onClick={() => handleEditTexte(texte.idTexteReglementaire, true)}
+                                aria-label="Nouvelle Version"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 11V5h4l-7 8-7-8h4v6"/><path d="M21 19H3"/><path d="M21 15H3"/><path d="M21 11H17.5"/><path d="M21 7H11"/></svg>
+                              </IconButton>
+                              <IconButton
+                                color="info"
+                                onClick={() => navigate(`${paths.dashboard.products.details}?id=${texte.idTexteReglementaire}`)}
+                                aria-label="Liste des versions"
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                              </IconButton>
+                            </Stack>
+                          </TableCell>
                           <TableCell>
                             <IconButton 
                               color="primary" 

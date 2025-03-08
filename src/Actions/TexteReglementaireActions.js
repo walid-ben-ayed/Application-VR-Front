@@ -117,3 +117,76 @@ export const addTexteReglementaire = async (data, dispatch) => {
     throw error;
   }
 };
+
+
+export const updateTexteReglementairePlus = async (id, data, dispatch) => {
+  console.log(`Updating texte with ID: ${id} and creating a new version`, data);
+  
+  try {
+    const token = localStorage.getItem(TOKEN);
+    const response = await axios.put(`http://localhost:9090/api/texteReglementaire/${id}/plus`, {
+      loiTitre: data.loiTitre,
+      codeNom: data.codeNom,
+      champApplication: data.champApplication,
+      texteResume: data.texteResume,
+      texte: data.texte,
+      pieceJointe: data.pieceJointe,
+      numeroArticle: parseInt(data.numeroArticle),
+      version: data.version
+    }, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (response.data) {
+      dispatch(UiActions.setIsSuccess("Texte réglementaire mis à jour avec succès et nouvelle version créée"));
+      toast.success("Texte réglementaire mis à jour avec succès et nouvelle version créée");
+      return response.data;
+    }
+  } catch (error) {
+    console.error("Error updating texte with version:", error);
+    dispatch(UiActions.setIsError("Échec de la mise à jour du texte réglementaire et de la création de version"));
+    toast.error("Échec de la mise à jour du texte réglementaire et de la création de version");
+    throw error;
+  }
+};
+
+export const getTexteReglementaireVersions = async (id, dispatch) => {
+  if (!id) {
+    dispatch(UiActions.setIsError("ID du texte réglementaire manquant"));
+    throw new Error("ID du texte réglementaire manquant");
+  }
+
+  try {
+    const token = localStorage.getItem(TOKEN);
+    
+    if (!token) {
+      dispatch(UiActions.setIsError("Vous n'êtes pas authentifié. Veuillez vous reconnecter."));
+      throw new Error("Token d'authentification manquant");
+    }
+    
+    console.log(`Fetching versions for texte with ID: ${id}`);
+    const response = await axios.get(`http://localhost:9090/api/texteReglementaire/${id}/versions`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    console.log("API versions response:", response.status, response.data);
+    return response.data;
+  } catch (error) {
+    console.error(`Error fetching texte versions:`, error);
+    
+    if (error.response && error.response.status === 401) {
+      dispatch(UiActions.setIsError("Session expirée. Veuillez vous reconnecter."));
+    } else {
+      dispatch(UiActions.setIsError("Échec de la récupération des versions du texte réglementaire"));
+      toast.error("Échec de la récupération des versions du texte réglementaire");
+    }
+    
+    throw error;
+  }
+};

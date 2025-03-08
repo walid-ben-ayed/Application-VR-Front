@@ -16,7 +16,7 @@ import Select from '@mui/material/Select';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { UiActions } from "@/Slice/UiSlice";
-import { addTexteReglementaire, updateTexteReglementaire, getTexteReglementaireById } from '@/Actions/TexteReglementaireActions';
+import { addTexteReglementaire, updateTexteReglementaire, getTexteReglementaireById, updateTexteReglementairePlus } from '@/Actions/TexteReglementaireActions';
 import { useDispatch } from 'react-redux';
 import { paths } from '@/paths';
 import { TextEditor } from '@/components/core/text-editor/text-editor';
@@ -27,11 +27,11 @@ import { File as FileIcon } from '@phosphor-icons/react/dist/ssr/File';
 import Avatar from '@mui/material/Avatar';
 import CircularProgress from '@mui/material/CircularProgress';
 
-export function ProductCreateForm({ isEditing, editId }) { // Added props for editing
+export function ProductCreateForm({ editId = null, isNewVersion = false }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
-  const [loadingTexteData, setLoadingTexteData] = useState(false); // Added state for loading texte data
+  const [loadingTexteData, setLoadingTexteData] = useState(false);
   const [formData, setFormData] = useState({
     loiTitre: '',
     codeNom: '',
@@ -47,6 +47,7 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
   const [selectedFile, setSelectedFile] = useState(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [validationErrors, setValidationErrors] = useState({});
+  const isEditing = !!editId;
 
   useEffect(() => {
     const fetchLawsAndCodes = async () => {
@@ -66,7 +67,6 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
     fetchLawsAndCodes();
   }, [dispatch]);
 
-  // Load TexteReglementaire data for editing if needed
   useEffect(() => {
     const fetchTexteData = async () => {
       if (isEditing && editId) {
@@ -85,12 +85,10 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
               version: texteData.version || 1
             });
 
-            // If there's a piece jointe, we need to create a file object for display
             if (texteData.pieceJointe) {
-              // Create a mock file object for display purposes
               const mockFile = new File(
-                [""], 
-                "pièce-jointe." + (texteData.pieceJointe.includes("data:application/pdf") ? "pdf" : "docx"), 
+                [""],
+                "pièce-jointe." + (texteData.pieceJointe.includes("data:application/pdf") ? "pdf" : "docx"),
                 { type: "application/octet-stream" }
               );
               setSelectedFile(mockFile);
@@ -134,7 +132,6 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
       [name]: value
     }));
 
-    // Clear validation error for this field when user edits it
     if (validationErrors[name]) {
       setValidationErrors(prev => ({
         ...prev,
@@ -150,7 +147,6 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
       [field]: htmlContent
     }));
 
-    // Clear validation error for this field when user edits it
     if (validationErrors[field]) {
       setValidationErrors(prev => ({
         ...prev,
@@ -162,7 +158,6 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
   const validateForm = () => {
     const errors = {};
 
-    // Required fields validation
     if (!formData.loiTitre) errors.loiTitre = "Le titre de la loi est requis";
     if (!formData.codeNom) errors.codeNom = "Le nom du code est requis";
     if (!formData.numeroArticle) errors.numeroArticle = "Le numéro d'article est requis";
@@ -178,7 +173,6 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (event) => {
-        // Extract only the base64 data after the prefix data:*/*;base64,
         const base64String = event.target.result.split(',')[1];
         resolve(base64String);
       };
@@ -189,34 +183,27 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
     });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      dispatch(UiActions.setIsError("Veuillez remplir tous les champs obligatoires"));
-      return;
-    }
-
+  const handleSubmit = async (event) => {
+    event.preventDefault();
     setLoading(true);
 
     try {
-      // Create a copy of form data for submission
+      let result;
+
       const submitData = { ...formData };
 
-      // If a file is selected, convert it to base64 for sending
       if (formData.pieceJointe instanceof File) {
         const base64String = await convertFileToBase64(formData.pieceJointe);
         submitData.pieceJointe = base64String;
       }
 
-      let result;
-
-      // Call the API to save the data
-      if (isEditing && editId) {
-        // Update existing TexteReglementaire
-        result = await updateTexteReglementaire(editId, submitData, dispatch);
+      if (isEditing) {
+        if (isNewVersion) {
+          result = await updateTexteReglementairePlus(editId, submitData, dispatch);
+        } else {
+          result = await updateTexteReglementaire(editId, submitData, dispatch);
+        }
       } else {
-        // Create new TexteReglementaire
         result = await addTexteReglementaire(submitData, dispatch);
       }
 
@@ -224,13 +211,17 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
         navigate(paths.dashboard.products.list);
       }
     } catch (error) {
-      console.error(isEditing ? "Erreur lors de la modification du texte réglementaire:" : "Erreur lors de la création du texte réglementaire:", error);
+      if (isNewVersion) {
+        console.error("Erreur lors de la création de la nouvelle version:", error);
+      } else {
+        console.error(isEditing ? "Erreur lors de la modification du texte réglementaire:" : "Erreur lors de la création du texte réglementaire:", error);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  if (isLoadingData || loadingTexteData) { // Added loadingTexteData to loading condition
+  if (isLoadingData || loadingTexteData) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
         <CircularProgress />
@@ -242,9 +233,9 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
     <form onSubmit={handleSubmit}>
       <Stack spacing={4}>
         <Card>
-          <CardHeader 
-            title="Informations principales" 
-            subheader="Entrez les informations de base du texte réglementaire"
+          <CardHeader
+            title={isNewVersion ? "Nouvelle Version" : isEditing ? "Modifier le texte réglementaire" : "Créer un texte réglementaire"}
+            subheader={isNewVersion ? "Créer une nouvelle version du texte réglementaire" : isEditing ? "Modifier les détails du texte réglementaire" : "Ajouter les détails du texte réglementaire"}
           />
           <Divider />
           <CardContent>
@@ -327,8 +318,8 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
         </Card>
 
         <Card>
-          <CardHeader 
-            title="Texte complet" 
+          <CardHeader
+            title="Texte complet"
             subheader="Saisissez le contenu complet du texte réglementaire"
           />
           <Divider />
@@ -352,8 +343,8 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
         </Card>
 
         <Card>
-          <CardHeader 
-            title="Résumé du texte" 
+          <CardHeader
+            title="Résumé du texte"
             subheader="Fournissez un résumé clair et concis du texte réglementaire"
           />
           <Divider />
@@ -377,8 +368,8 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
         </Card>
 
         <Card>
-          <CardHeader 
-            title="Pièce jointe" 
+          <CardHeader
+            title="Pièce jointe"
             subheader="Ajoutez une pièce jointe si nécessaire (optionnel)"
           />
           <Divider />
@@ -393,7 +384,7 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
                 }}
                 caption="PDF, DOC, DOCX, JPG, PNG jusqu'à 10MB"
                 maxFiles={1}
-                maxSize={10485760} // 10MB
+                maxSize={10485760}
                 onDrop={handleFileDrop}
               />
             ) : (
@@ -443,13 +434,13 @@ export function ProductCreateForm({ isEditing, editId }) { // Added props for ed
           >
             Annuler
           </Button>
-          <Button 
-            type="submit" 
-            variant="contained" 
+          <Button
             disabled={loading}
-            startIcon={loading && <CircularProgress size={20} color="inherit" />}
+            type="submit"
+            variant="contained"
+            startIcon={loading ? <CircularProgress size={24} color="inherit" /> : null}
           >
-            {loading ? "Enregistrement..." : (isEditing ? "Modifier" : "Créer le texte réglementaire")} {/*Updated button text for editing*/}
+            {isNewVersion ? 'Créer nouvelle version' : isEditing ? 'Modifier le texte réglementaire' : 'Créer le texte réglementaire'}
           </Button>
         </Box>
       </Stack>
