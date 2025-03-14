@@ -18,10 +18,10 @@ export function SplitLayout({ children }) {
       >
         <Stack spacing={4} sx={{ maxWidth: '700px' }}>
           <Stack spacing={1}>
-            <Typography variant="h4">Welcome to Devias Kit PRO</Typography>
+            <Typography variant="h4">Welcome to Preventis Veille</Typography>
             <Typography color="text.secondary">
-              A professional template that comes with ready-to-use MUI components developed with one common goal in
-              mind, help you build faster & beautiful applications.
+              Simplifiez la gestion de vos textes réglementaires. Automatisez les processus, 
+              sécurisez vos données et accédez facilement aux dernières mises à jour légales.
             </Typography>
           </Stack>
           <Stack

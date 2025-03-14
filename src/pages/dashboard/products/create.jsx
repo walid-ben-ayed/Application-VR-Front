@@ -60,12 +60,8 @@ export function Page() {
             </div>
             <div>
               <Typography variant="h4">
-                {isEditing || isNewVersion ? "Nouvelle Version" : "Créer un texte réglementaire"} {/* Updated title */}
+                {isNewVersion ? "Nouvelle Version" : isEditing ? "Modifier le texte réglementaire" : "Créer un texte réglementaire"}
               </Typography>
-              {/* Added "Nouveau Version" button */}
-              <IconButton aria-label="add" href={`${window.location.href}?newVersion=true`}>
-                <AddIcon />
-              </IconButton>
             </div>
           </Stack>
           <ProductCreateForm isEditing={isEditing} editId={editId} isNewVersion={isNewVersion} />

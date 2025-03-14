@@ -154,6 +154,9 @@ export const updateTexteReglementairePlus = async (id, data, dispatch) => {
 };
 
 export const getTexteReglementaireVersions = async (id, dispatch) => {
+  console.log("getTexteReglementaireVersions called with ID:", id);
+  console.log("ID type:", typeof id);
+  
   if (!id) {
     dispatch(UiActions.setIsError("ID du texte réglementaire manquant"));
     throw new Error("ID du texte réglementaire manquant");

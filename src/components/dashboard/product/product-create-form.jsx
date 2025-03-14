@@ -58,7 +58,6 @@ export function ProductCreateForm({ editId = null, isNewVersion = false }) {
         const codesData = await fetchCodes();
         setCodes(codesData || []);
       } catch (error) {
-        console.error("Error fetching laws and codes:", error);
         dispatch(UiActions.setIsError("Erreur lors du chargement des lois et codes"));
       } finally {
         setIsLoadingData(false);
