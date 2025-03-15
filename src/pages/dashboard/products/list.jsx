@@ -2,7 +2,6 @@ import * as React from 'react';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
 import Card from '@mui/material/Card';
-import Divider from '@mui/material/Divider';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import { Plus as PlusIcon } from '@phosphor-icons/react/dist/ssr/Plus';
@@ -28,6 +27,8 @@ import TableCell from '@mui/material/TableCell';
 import TableContainer from '@mui/material/TableContainer';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
+import TablePagination from '@mui/material/TablePagination';
+import TextField from '@mui/material/TextField';
 
 import { config } from '@/config';
 import { paths } from '@/paths';
@@ -45,8 +46,11 @@ export function Page() {
   const [resumeModalOpen, setResumeModalOpen] = useState(false);
   const [selectedContent, setSelectedContent] = useState("");
   const [selectedTitle, setSelectedTitle] = useState("");
-  const [texteReglementaires, setTexteReglementaires] = useState([]);
+  const [texteReglementaires, setTexteReglementaires] = useState({ content: [], totalElements: 0 });
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(0); // Added state for page number
+  const [size] = useState(5); // Added state for page size (fixed to 5)
+  const [searchTerm, setSearchTerm] = useState(''); // Added state for search term
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { previewId } = useExtractSearchParams();
@@ -54,7 +58,7 @@ export function Page() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const data = await fetchTexteReglementaire(dispatch);
+        const data = await fetchTexteReglementaire(dispatch, page, size, searchTerm);
         setTexteReglementaires(data);
         setLoading(false);
       } catch (error) {
@@ -64,7 +68,8 @@ export function Page() {
     };
 
     loadData();
-  }, [dispatch]);
+  }, [dispatch, page, searchTerm]); // Added page and searchTerm to dependencies
+
 
   const handleOpenTextModal = (text, title) => {
     setSelectedContent(text);
@@ -106,8 +111,8 @@ export function Page() {
         const success = await deleteTexteReglementaire(id, dispatch);
         if (success) {
           // Refresh the list after deletion
-          const data = await fetchTexteReglementaire(dispatch);
-          setTexteReglementaires(data);
+          const data = await fetchTexteReglementaire(dispatch, page, size, searchTerm);
+          setTexteReglementaires(data.content); // Access content property of the Page object
         }
       } catch (error) {
         console.error('Error deleting texte reglementaire:', error);
@@ -293,6 +298,18 @@ export function Page() {
               />
             </Stack>
           </Stack>
+          <Box sx={{ mb: 2 }}> {/* Added search bar */}
+            <TextField
+              fullWidth
+              label="Rechercher par titre de loi"
+              variant="outlined"
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setPage(0); // Reset page to 0 when search term changes
+              }}
+            />
+          </Box>
           <Card>
             <Box sx={{ overflowX: 'auto' }}>
               <TableContainer>
@@ -304,8 +321,8 @@ export function Page() {
                       <TableCell>Champ d'application</TableCell>
                       <TableCell>Numéro d'article</TableCell>
                       <TableCell>Version</TableCell>
-                      <TableCell>Résumé</TableCell>
                       <TableCell>Texte</TableCell>
+                      <TableCell>Résumé</TableCell>
                       <TableCell>Pièce jointe</TableCell>
                       <TableCell>Actions</TableCell>
                     </TableRow>
@@ -315,12 +332,12 @@ export function Page() {
                       <TableRow>
                         <TableCell colSpan={9} align="center">Chargement des données...</TableCell>
                       </TableRow>
-                    ) : texteReglementaires.length === 0 ? (
+                    ) : texteReglementaires.content.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={9} align="center">Aucun texte réglementaire trouvé</TableCell>
                       </TableRow>
                     ) : (
-                      texteReglementaires.map((texte, index) => (
+                      texteReglementaires.content.map((texte, index) => (
                         <TableRow key={index}>
                           <TableCell>{texte.loiTitre}</TableCell>
                           <TableCell>{texte.codeNom}</TableCell>
@@ -346,15 +363,7 @@ export function Page() {
                               </IconButton>
                             </Stack>
                           </TableCell>
-                          <TableCell>
-                            <IconButton 
-                              color="primary" 
-                              onClick={() => handleOpenResumeModal(texte.texteResume, "Résumé du texte")}
-                              aria-label="Voir le résumé"
-                            >
-                              <TextFormatIcon />
-                            </IconButton>
-                          </TableCell>
+              
                           <TableCell>
                             <IconButton 
                               color="primary" 
@@ -364,6 +373,16 @@ export function Page() {
                               <FileTextIcon />
                             </IconButton>
                           </TableCell>
+                          <TableCell>
+                            <IconButton 
+                              color="primary" 
+                              onClick={() => handleOpenResumeModal(texte.texteResume, "Résumé du texte")}
+                              aria-label="Voir le résumé"
+                            >
+                              <TextFormatIcon />
+                            </IconButton>
+                          </TableCell>
+                          
                           <TableCell>
                             {texte.pieceJointe ? (
                               <IconButton
@@ -403,6 +422,20 @@ export function Page() {
                   </TableBody>
                 </Table>
               </TableContainer>
+              <TablePagination
+                component="div"
+                count={texteReglementaires.totalElements || 0}
+                page={page}
+                onPageChange={(event, newPage) => setPage(newPage)}
+                rowsPerPage={size}
+                rowsPerPageOptions={[5]}
+                nextIconButtonProps={{
+                  'aria-label': 'Page suivante'
+                }}
+                backIconButtonProps={{
+                  'aria-label': 'Page précédente'
+                }}
+              />
             </Box>
           </Card>
         </Stack>

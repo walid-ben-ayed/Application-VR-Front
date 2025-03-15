@@ -17,7 +17,7 @@ export function WorkspacesSwitch() {
 
   return (
     <React.Fragment>
-      <Stack
+      {/*<Stack
         direction="row"
         onClick={popover.handleOpen}
         ref={popover.anchorRef}
@@ -41,12 +41,12 @@ export function WorkspacesSwitch() {
         </Box>
         <CaretUpDownIcon color="var(--Workspaces-expand-color)" fontSize="var(--icon-fontSize-sm)" />
       </Stack>
-      <WorkspacesPopover
+      *<WorkspacesPopover
         anchorEl={popover.anchorRef.current}
         onChange={popover.handleClose}
         onClose={popover.handleClose}
         open={popover.open}
-      />
+      />*/}
     </React.Fragment>
   );
 }

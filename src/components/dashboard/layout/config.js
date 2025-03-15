@@ -139,7 +139,7 @@ export const layoutConfig = {
         { key: 'tasks', title: 'Tasks', href: paths.dashboard.tasks, icon: 'kanban' },*/
       ],
     },
-    {
+    /*{
       key: 'other',
       title: 'Other',
       items: [
@@ -212,8 +212,8 @@ export const layoutConfig = {
           ],
         },
       ],
-    },
-    {
+    },*/
+    /*{
       key: 'misc',
       title: 'Misc',
       items: [
@@ -245,6 +245,6 @@ export const layoutConfig = {
         { key: 'blank', title: 'Blank', href: paths.dashboard.blank, icon: 'file-dashed' },
         { key: 'external', title: 'External link', href: 'https://devias.io', external: true, icon: 'link' },
       ],
-    },
+    },*/
   ],
 };

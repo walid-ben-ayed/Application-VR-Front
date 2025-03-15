@@ -3,16 +3,26 @@ import axios from 'axios';
 import { TOKEN } from "@/Constants";
 import { toast } from '@/components/core/toaster';
 
-export const fetchTexteReglementaire = async (dispatch) => {
+export const fetchTexteReglementaire = async (dispatch, page = 0, size = 5, searchTerm = '') => {
   try {
     const token = localStorage.getItem(TOKEN);
-    const response = await axios.get('http://localhost:9090/api/texteReglementaire', {
+    
+    // Construire l'URL avec les paramètres de requête
+    let url = `http://localhost:9090/api/texteReglementaire?page=${page}&size=${size}`;
+    
+    // Ajouter le paramètre de recherche s'il existe
+    if (searchTerm && searchTerm.trim() !== '') {
+      url += `&loiTitre=${encodeURIComponent(searchTerm)}`;
+    }
+    
+    const response = await axios.get(url, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
       }
     });
-    return response.data;
+    
+    return response.data; // Cela retournera un objet Page avec le contenu et les métadonnées de pagination
   } catch (error) {
     dispatch(UiActions.setIsError("Échec du chargement des textes réglementaires"));
     throw error;
