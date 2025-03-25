@@ -116,6 +116,18 @@ export const paths = {
       preview: (productId) => `/dashboard/products?previewId=${productId}`,
       details: (productId) => `/dashboard/products/${productId}`,
     },
+    articleParams: {
+      champApplications: {
+        list: '/dashboard/article-params/champ-applications',
+        create: '/dashboard/article-params/champ-applications/create',
+        edit: (id) => `/dashboard/article-params/champ-applications/edit/${id}`,
+      },
+      theme: {
+        list: '/dashboard/article-params/theme',
+        create: '/dashboard/article-params/theme/create',
+        edit: (id) => `/dashboard/article-params/theme/edit/${id}`,
+      }
+    },
     social: {
       profile: { timeline: '/dashboard/social/profile', connections: '/dashboard/social/profile/connections' },
       feed: '/dashboard/social/feed',

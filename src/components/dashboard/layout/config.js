@@ -23,7 +23,7 @@ export const layoutConfig = {
           icon: 'gear',
           matcher: { type: 'startsWith', href: '/dashboard/settings' },
         },
-        /*{
+        {
           key: 'customers',
           title: 'Customers',
           icon: 'users',
@@ -32,7 +32,7 @@ export const layoutConfig = {
             { key: 'customers:create', title: 'Create customer', href: paths.dashboard.customers.create },
             { key: 'customers:details', title: 'Customer details', href: paths.dashboard.customers.details('1') },
           ],
-        },*/
+        },
         {
           key: 'products',
           title: 'Base Réglementaire',
@@ -43,7 +43,18 @@ export const layoutConfig = {
             { key: 'products:details', title: 'Versions texte réglementaire', href: paths.dashboard.products.details('1') },
           ],  
         },
-        /*{
+        {
+          key: 'article-params',
+          title: 'Paramètres de l\'Article',
+          icon: 'gear-six',
+          items: [
+            { key: 'champ-applications', title: 'Liste Champ d\'application', href: paths.dashboard.articleParams.champApplications.list },
+            { key: 'champ-applications:create', title: 'Créer Champ d\'application', href: paths.dashboard.articleParams.champApplications.create },
+            { key: 'theme', title: 'Liste Thème', href: paths.dashboard.articleParams.theme.list },
+            { key: 'theme:create', title: 'Créer Thème', href: paths.dashboard.articleParams.theme.create }
+          ],
+        },
+        {
           key: 'orders',
           title: 'Orders',
           icon: 'shopping-cart-simple',
@@ -136,10 +147,10 @@ export const layoutConfig = {
           matcher: { type: 'startsWith', href: '/dashboard/chat' },
         },
         { key: 'calendar', title: 'Calendar', href: paths.dashboard.calendar, icon: 'calendar-check' },
-        { key: 'tasks', title: 'Tasks', href: paths.dashboard.tasks, icon: 'kanban' },*/
+        { key: 'tasks', title: 'Tasks', href: paths.dashboard.tasks, icon: 'kanban' },
       ],
     },
-    /*{
+    {
       key: 'other',
       title: 'Other',
       items: [
@@ -212,8 +223,8 @@ export const layoutConfig = {
           ],
         },
       ],
-    },*/
-    /*{
+    },
+    {
       key: 'misc',
       title: 'Misc',
       items: [
@@ -245,6 +256,6 @@ export const layoutConfig = {
         { key: 'blank', title: 'Blank', href: paths.dashboard.blank, icon: 'file-dashed' },
         { key: 'external', title: 'External link', href: 'https://devias.io', external: true, icon: 'link' },
       ],
-    },*/
+    },
   ],
 };

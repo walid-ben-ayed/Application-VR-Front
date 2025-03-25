@@ -43,6 +43,63 @@ export const route = {
       ],
     },
     {
+      path: 'article-params',
+      children: [
+        {
+          path: 'champ-applications',
+          children: [
+            {
+              index: true,
+              lazy: async () => {
+                const { Page } = await import('@/pages/dashboard/article-params/champ-applications/list');
+                return { Component: Page };
+              },
+            },
+            {
+              path: 'create',
+              lazy: async () => {
+                const { Page } = await import('@/pages/dashboard/article-params/champ-applications/form');
+                return { Component: Page };
+              },
+            },
+            {
+              path: 'edit/:id', 
+              lazy: async () => {
+                const { Page } = await import('@/pages/dashboard/article-params/champ-applications/form');
+                return { Component: Page };
+              },
+            },
+          ],
+        },
+        {
+          path: 'theme',
+          children: [
+            {
+              index: true,
+              lazy: async () => {
+                const { Page } = await import('@/pages/dashboard/article-params/theme/list');
+                return { Component: Page };
+              },
+            },
+            {
+              path: 'create',
+              lazy: async () => {
+                const { Page } = await import('@/pages/dashboard/article-params/theme/form');
+                return { Component: Page };
+              },
+            },
+            {
+              path: 'edit/:id', 
+              lazy: async () => {
+                const { Page } = await import('@/pages/dashboard/article-params/theme/form');
+                return { Component: Page };
+              },
+            },
+          ],
+        },
+      ],
+    },
+    {
       path: 'analytics',
       lazy: async () => {
         const { Page } = await import('@/pages/dashboard/analytics');

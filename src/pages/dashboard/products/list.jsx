@@ -365,13 +365,18 @@ export function Page() {
                           </TableCell>
               
                           <TableCell>
-                            <IconButton 
-                              color="primary" 
-                              onClick={() => handleOpenTextModal(texte.texte, "Texte intégral")}
-                              aria-label="Voir le texte"
-                            >
-                              <FileTextIcon />
-                            </IconButton>
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              <Typography noWrap sx={{ maxWidth: 200 }}>
+                              {texte.texte?.replace(/<[^>]*>/g, '').split(' ').slice(0, 8).join(' ')}...
+                              </Typography>
+                              <IconButton 
+                                color="primary" 
+                                onClick={() => handleOpenTextModal(texte.texte, "Texte intégral")}
+                                aria-label="Voir le texte"
+                              >
+                                <FileTextIcon />
+                              </IconButton>
+                            </Stack>
                           </TableCell>
                           <TableCell>
                             <IconButton 
