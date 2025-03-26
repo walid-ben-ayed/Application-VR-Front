@@ -12,7 +12,7 @@ export const fetchTexteReglementaire = async (dispatch, page = 0, size = 5, sear
     
     // Ajouter le paramètre de recherche s'il existe
     if (searchTerm && searchTerm.trim() !== '') {
-      url += `&loiTitre=${encodeURIComponent(searchTerm)}`;
+      url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
     }
     
     const response = await axios.get(url, {
@@ -45,13 +45,48 @@ export const getTexteReglementaireById = async (id, dispatch) => {
   }
 };
 
+export const filterTexteReglementaire = async (dispatch, page = 0, size = 5, champApplication = '', theme = '', searchTerm = '') => {
+  try {
+      const token = localStorage.getItem(TOKEN);
+
+      // Construire l'URL avec les paramètres de requête
+      let url = `http://localhost:9090/api/texteReglementaire/filter?page=${page}&size=${size}`;
+
+      // Ajouter les paramètres de filtre s'ils existent
+      if (champApplication && champApplication.trim() !== '') {
+          url += `&champApplication=${encodeURIComponent(champApplication)}`;
+      }
+
+      if (theme && theme.trim() !== '') {
+          url += `&theme=${encodeURIComponent(theme)}`;
+      }
+
+      if (searchTerm && searchTerm.trim() !== '') {
+          url += `&searchTerm=${encodeURIComponent(searchTerm)}`;
+      }
+
+      const response = await axios.get(url, {
+          headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+          }
+      });
+
+      return response.data;
+  } catch (error) {
+      dispatch(UiActions.setIsError("Échec du filtrage des textes réglementaires"));
+      throw error;
+  }
+};
+
+
 export const deleteTexteReglementaire = async (id, dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
     const response = await axios.delete(`http://localhost:9090/api/texteReglementaire/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json'  
       }
     });
     if (response.status === 200) {
@@ -73,6 +108,7 @@ export const updateTexteReglementaire = async (id, data, dispatch) => {
       loiTitre: data.loiTitre,
       codeNom: data.codeNom,
       champApplication: data.champApplication,
+      theme: data.theme,
       texteResume: data.texteResume,
       texte: data.texte,
       pieceJointe: data.pieceJointe,
@@ -104,6 +140,7 @@ export const addTexteReglementaire = async (data, dispatch) => {
       loiTitre: data.loiTitre,
       codeNom: data.codeNom,
       champApplication: data.champApplication,
+      theme: data.theme,
       texteResume: data.texteResume,
       texte: data.texte,
       pieceJointe: data.pieceJointe,
@@ -138,6 +175,7 @@ export const updateTexteReglementairePlus = async (id, data, dispatch) => {
       loiTitre: data.loiTitre,
       codeNom: data.codeNom,
       champApplication: data.champApplication,
+      theme: data.theme,
       texteResume: data.texteResume,
       texte: data.texte,
       pieceJointe: data.pieceJointe,

@@ -119,3 +119,30 @@ export const addTheme = async (themeData, dispatch) => {
     throw error;
   }
 };
+
+// 📌 Récupérer les thèmes par champ d'application
+export const fetchThemesByChampApplication = async (champApplication, dispatch) => {
+  try {
+    const token = localStorage.getItem(TOKEN);
+    
+    if (!token) {
+      dispatch(UiActions.setIsError("Session expirée. Veuillez vous reconnecter."));
+      throw new Error("Token d'authentification manquant");
+    }
+
+    const response = await axios.get(`http://localhost:9090/api/themes/champApplication/${champApplication}/themes`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    });
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 401) {
+      dispatch(UiActions.setIsError("Session expirée. Veuillez vous reconnecter."));
+    } else {
+      dispatch(UiActions.setIsError("Échec de la récupération des thèmes par champ d'application"));
+    }
+    throw error;
+  }
+};

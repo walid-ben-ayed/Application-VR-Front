@@ -26,6 +26,8 @@ import { FileDropzone } from '@/components/core/file-dropzone';
 import { File as FileIcon } from '@phosphor-icons/react/dist/ssr/File';
 import Avatar from '@mui/material/Avatar';
 import CircularProgress from '@mui/material/CircularProgress';
+import { fetchThemesByChampApplication } from '@/Actions/ThemeActions';
+import { fetchChampApplications } from '@/Actions/ChampApplicationActions';
 
 export function ProductCreateForm({ editId = null, isNewVersion = false }) {
   const dispatch = useDispatch();
@@ -37,6 +39,7 @@ export function ProductCreateForm({ editId = null, isNewVersion = false }) {
     codeNom: '',
     numeroArticle: '',
     champApplication: '',
+    theme: '', // Added theme field
     texteResume: '',
     texte: '',
     pieceJointe: null,
@@ -44,6 +47,8 @@ export function ProductCreateForm({ editId = null, isNewVersion = false }) {
   });
   const [lois, setLois] = useState([]);
   const [codes, setCodes] = useState([]);
+  const [themes, setThemes] = useState([]);
+  const [champApplications, setChampApplications] = useState([]);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isLoadingData, setIsLoadingData] = useState(true);
   const [validationErrors, setValidationErrors] = useState({});
@@ -78,6 +83,7 @@ export function ProductCreateForm({ editId = null, isNewVersion = false }) {
               codeNom: texteData.codeNom || '',
               numeroArticle: texteData.numeroArticle?.toString() || '',
               champApplication: texteData.champApplication || '',
+              theme: texteData.theme || '', // Added theme to formData
               texteResume: texteData.texteResume || '',
               texte: texteData.texte || '',
               pieceJointe: texteData.pieceJointe || null,
@@ -104,6 +110,37 @@ export function ProductCreateForm({ editId = null, isNewVersion = false }) {
 
     fetchTexteData();
   }, [isEditing, editId, dispatch]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const champsData = await fetchChampApplications(dispatch);
+        setChampApplications(champsData);
+      } catch (error) {
+        console.error("Failed to load data:", error);
+        dispatch(UiActions.setIsError("Erreur lors du chargement des champs d'application"));
+      }
+    };
+    loadData();
+  }, [dispatch]);
+
+  useEffect(() => {
+    const loadThemes = async () => {
+      if (formData.champApplication) {
+        try {
+          const themesData = await fetchThemesByChampApplication(formData.champApplication, dispatch);
+          setThemes(themesData);
+        } catch (error) {
+          console.error("Failed to load themes:", error);
+          dispatch(UiActions.setIsError("Erreur lors du chargement des thèmes"));
+        }
+      } else {
+        setThemes([]);
+      }
+    };
+    loadThemes();
+  }, [formData.champApplication, dispatch]);
+
 
   const handleFileDrop = (acceptedFiles) => {
     if (acceptedFiles.length > 0) {
@@ -161,6 +198,7 @@ export function ProductCreateForm({ editId = null, isNewVersion = false }) {
     if (!formData.codeNom) errors.codeNom = "Le nom du code est requis";
     if (!formData.numeroArticle) errors.numeroArticle = "Le numéro d'article est requis";
     if (!formData.champApplication) errors.champApplication = "Le champ d'application est requis";
+    if (!formData.theme) errors.theme = "Le thème est requis"; // Added theme validation
     if (!formData.texteResume) errors.texteResume = "Le résumé du texte est requis";
     if (!formData.texte) errors.texte = "Le texte complet est requis";
 
@@ -215,6 +253,7 @@ export function ProductCreateForm({ editId = null, isNewVersion = false }) {
       } else {
         console.error(isEditing ? "Erreur lors de la modification du texte réglementaire:" : "Erreur lors de la création du texte réglementaire:", error);
       }
+      dispatch(UiActions.setIsError("Erreur lors de l'enregistrement"));
     } finally {
       setLoading(false);
     }
@@ -300,15 +339,43 @@ export function ProductCreateForm({ editId = null, isNewVersion = false }) {
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth error={!!validationErrors.champApplication}>
                   <InputLabel required>Champ d'application</InputLabel>
-                  <OutlinedInput
+                  <Select
                     name="champApplication"
+                    value={formData.champApplication}
                     onChange={handleChange}
                     required
-                    value={formData.champApplication}
-                    label="Champ d'application"
-                  />
+                    input={<OutlinedInput label="Champ d'application" />}
+                  >
+                    {champApplications.map((champ) => (
+                      <MenuItem key={champ.id} value={champ.nom}>
+                        {champ.nom}
+                      </MenuItem>
+                    ))}
+                  </Select>
                   {validationErrors.champApplication && (
                     <Typography color="error" variant="caption">{validationErrors.champApplication}</Typography>
+                  )}
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth error={!!validationErrors.theme}>
+                  <InputLabel required>Theme</InputLabel>
+                  <Select
+                    name="theme"
+                    value={formData.theme}
+                    onChange={handleChange}
+                    required
+                    disabled={!formData.champApplication}
+                    input={<OutlinedInput label="Theme" />}
+                  >
+                    {themes.map((theme) => (
+                      <MenuItem key={theme.id} value={theme.nom}>
+                        {theme.nom}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                  {validationErrors.theme && (
+                    <Typography color="error" variant="caption">{validationErrors.theme}</Typography>
                   )}
                 </FormControl>
               </Grid>

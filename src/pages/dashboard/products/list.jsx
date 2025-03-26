@@ -29,6 +29,12 @@ import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
 import TablePagination from '@mui/material/TablePagination';
 import TextField from '@mui/material/TextField';
+import Grid from '@mui/material/Grid';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
+
 
 import { config } from '@/config';
 import { paths } from '@/paths';
@@ -36,6 +42,9 @@ import { RouterLink } from '@/components/core/link';
 import { ProductModal } from '@/components/dashboard/product/product-modal';
 import { CodeFormModal } from '@/components/widgets/modals/code-form-modal';
 import { fetchTexteReglementaire, deleteTexteReglementaire, getTexteReglementaireById } from '@/Actions/TexteReglementaireActions';
+import { fetchChampApplications } from '@/Actions/ChampApplicationActions';
+import { fetchThemesByChampApplication } from '@/Actions/ThemeActions';
+import { filterTexteReglementaire } from '@/Actions/TexteReglementaireActions';
 
 const metadata = { title: `Liste des textes réglementaires | Dashboard | ${config.site.name}` };
 
@@ -48,28 +57,78 @@ export function Page() {
   const [selectedTitle, setSelectedTitle] = useState("");
   const [texteReglementaires, setTexteReglementaires] = useState({ content: [], totalElements: 0 });
   const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0); // Added state for page number
-  const [size] = useState(5); // Added state for page size (fixed to 5)
-  const [searchTerm, setSearchTerm] = useState(''); // Added state for search term
+  const [page, setPage] = useState(0); 
+  const [size] = useState(5); 
+  const [searchTerm, setSearchTerm] = useState(''); 
+  const [champApplications, setChampApplications] = useState([]);
+  const [themes, setThemes] = useState([]);
+  const [selectedChamp, setSelectedChamp] = useState('');
+  const [selectedTheme, setSelectedTheme] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { previewId } = useExtractSearchParams();
+  const [currentPage, setCurrentPage] = useState(0);
+  const pageSize = 5;
+
 
   useEffect(() => {
-    const loadData = async () => {
+    const loadChampApplications = async () => {
       try {
-        const data = await fetchTexteReglementaire(dispatch, page, size, searchTerm);
-        setTexteReglementaires(data);
-        setLoading(false);
+        const champsData = await fetchChampApplications(dispatch);
+        setChampApplications(champsData);
       } catch (error) {
-        console.error("Failed to load texte reglementaire:", error);
-        setLoading(false);
+        console.error("Failed to load champ applications:", error);
       }
     };
+    loadChampApplications();
+  }, [dispatch]);
 
-    loadData();
-  }, [dispatch, page, searchTerm]); // Added page and searchTerm to dependencies
+  useEffect(() => {
+    const loadThemes = async () => {
+      if (selectedChamp) {
+        try {
+          const themesData = await fetchThemesByChampApplication(selectedChamp, dispatch);
+          setThemes(themesData);
+        } catch (error) {
+          console.error("Failed to load themes:", error);
+        }
+      } else {
+        setThemes([]);
+        setSelectedTheme('');
+      }
+    };
+    loadThemes();
+  }, [selectedChamp, dispatch]);
 
+  useEffect(() => {
+    loadTexteReglementaires();
+  }, [currentPage, searchTerm, selectedChamp, selectedTheme]);
+
+  const loadTexteReglementaires = async () => {
+    setLoading(true);
+    try {
+      let data;
+      if (!selectedChamp && !selectedTheme) {
+        // Si aucun filtre n'est sélectionné, utiliser fetchTexteReglementaire
+        data = await fetchTexteReglementaire(dispatch, currentPage, pageSize, searchTerm);
+      } else {
+        // Sinon utiliser filterTexteReglementaire avec les filtres
+        data = await filterTexteReglementaire(
+          dispatch,
+          currentPage,
+          pageSize,
+          selectedChamp,
+          selectedTheme,
+          searchTerm
+        );
+      }
+      setTexteReglementaires(data);
+    } catch (error) {
+      console.error("Failed to load texts:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleOpenTextModal = (text, title) => {
     setSelectedContent(text);
@@ -112,7 +171,7 @@ export function Page() {
         if (success) {
           // Refresh the list after deletion
           const data = await fetchTexteReglementaire(dispatch, page, size, searchTerm);
-          setTexteReglementaires(data.content); // Access content property of the Page object
+          setTexteReglementaires(data); // Set the whole data object
         }
       } catch (error) {
         console.error('Error deleting texte reglementaire:', error);
@@ -272,7 +331,7 @@ export function Page() {
                 variant="contained"
                 onClick={() => setOpenLoiModal(true)}
               >
-                Loi-Décret-Article-Circulaire
+                Loi-Décret-Circulaire
               </Button>
               <LoiFormModal
                 open={openLoiModal}
@@ -298,33 +357,75 @@ export function Page() {
               />
             </Stack>
           </Stack>
-          <Box sx={{ mb: 2 }}> {/* Added search bar */}
-            <TextField
-              fullWidth
-              label="Rechercher par titre de loi"
-              variant="outlined"
-              value={searchTerm}
-              onChange={(e) => {
-                setSearchTerm(e.target.value);
-                setPage(0); // Reset page to 0 when search term changes
-              }}
-            />
-          </Box>
+          <Stack spacing={2} sx={{ maxWidth: '800px' }}>
+  <Grid container spacing={2} alignItems="center">
+    <Grid item xs={12} sm={4}>
+      <FormControl fullWidth>
+        <InputLabel>Champ d'application</InputLabel>
+        <Select
+          value={selectedChamp}
+          onChange={(e) => setSelectedChamp(e.target.value)}
+          label="Champ d'application"
+        >
+          <MenuItem value="">Tous</MenuItem>
+          {champApplications.map((champ) => (
+            <MenuItem key={champ.id} value={champ.nom}>
+              {champ.nom}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Grid>
+    <Grid item xs={12} sm={4}>
+      <FormControl fullWidth>
+        <InputLabel>Thème</InputLabel>
+        <Select
+          value={selectedTheme}
+          onChange={(e) => setSelectedTheme(e.target.value)}
+          label="Thème"
+          disabled={!selectedChamp}
+        >
+          <MenuItem value="">Tous</MenuItem>
+          {themes.map((theme) => (
+            <MenuItem key={theme.id} value={theme.nom}>
+              {theme.nom}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Grid>
+    <Grid item xs={12} sm={4}>
+      <TextField
+        fullWidth
+        label="Rechercher dans tous les champs"
+        placeholder="Rechercher ..."
+        variant="outlined"
+        value={searchTerm}
+        onChange={(e) => {
+          const value = e.target.value;
+          setSearchTerm(value);
+          setPage(0);
+        }}
+      />
+    </Grid>
+  </Grid>
+</Stack>
+
           <Card>
             <Box sx={{ overflowX: 'auto' }}>
               <TableContainer>
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Titre de la loi</TableCell>
-                      <TableCell>Code</TableCell>
-                      <TableCell>Champ d'application</TableCell>
-                      <TableCell>Numéro d'article</TableCell>
-                      <TableCell>Version</TableCell>
-                      <TableCell>Texte</TableCell>
-                      <TableCell>Résumé</TableCell>
-                      <TableCell>Pièce jointe</TableCell>
-                      <TableCell>Actions</TableCell>
+                      <TableCell align="center">Numéro d'article</TableCell>
+                      <TableCell align="center">Version</TableCell>
+                      <TableCell align="center">Texte</TableCell>
+                      <TableCell align="center">Résumé</TableCell>
+                      <TableCell align="center">Pièce jointe</TableCell>
+                      <TableCell align="center">Champ d'application</TableCell>
+                      <TableCell align="center">Thème</TableCell>
+                      <TableCell align="center">Titre de la loi</TableCell>
+                      <TableCell align="center">Actions</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
@@ -339,9 +440,6 @@ export function Page() {
                     ) : (
                       texteReglementaires.content.map((texte, index) => (
                         <TableRow key={index}>
-                          <TableCell>{texte.loiTitre}</TableCell>
-                          <TableCell>{texte.codeNom}</TableCell>
-                          <TableCell>{texte.champApplication}</TableCell>
                           <TableCell>{texte.numeroArticle}</TableCell>
                           <TableCell>
                             <Stack direction="row" spacing={1}>
@@ -363,7 +461,6 @@ export function Page() {
                               </IconButton>
                             </Stack>
                           </TableCell>
-              
                           <TableCell>
                             <Stack direction="row" spacing={1} alignItems="center">
                               <Typography noWrap sx={{ maxWidth: 200 }}>
@@ -387,7 +484,6 @@ export function Page() {
                               <TextFormatIcon />
                             </IconButton>
                           </TableCell>
-                          
                           <TableCell>
                             {texte.pieceJointe ? (
                               <IconButton
@@ -403,6 +499,9 @@ export function Page() {
                               </Typography>
                             )}
                           </TableCell>
+                          <TableCell>{texte.champApplication}</TableCell>
+                          <TableCell>{texte.theme || '-'}</TableCell>
+                          <TableCell>{texte.loiTitre}</TableCell>
                           <TableCell>
                             <Stack direction="row" spacing={1}>
                               <IconButton
