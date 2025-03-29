@@ -331,7 +331,7 @@ export function Page() {
                 variant="contained"
                 onClick={() => setOpenLoiModal(true)}
               >
-                Loi-Décret-Circulaire
+                Loi-Décret-Arrêté-Circulaire
               </Button>
               <LoiFormModal
                 open={openLoiModal}
@@ -417,14 +417,14 @@ export function Page() {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell align="center">Numéro d'article</TableCell>
+                      <TableCell >Numéro d'article</TableCell>
                       <TableCell align="center">Version</TableCell>
                       <TableCell align="center">Texte</TableCell>
-                      <TableCell align="center">Résumé</TableCell>
+                      <TableCell >Résumé</TableCell>
                       <TableCell align="center">Pièce jointe</TableCell>
-                      <TableCell align="center">Champ d'application</TableCell>
-                      <TableCell align="center">Thème</TableCell>
-                      <TableCell align="center">Titre de la loi</TableCell>
+                      <TableCell >Champ d'application</TableCell>
+                      <TableCell >Thème</TableCell>
+                      <TableCell align="center">Source </TableCell>
                       <TableCell align="center">Actions</TableCell>
                     </TableRow>
                   </TableHead>
