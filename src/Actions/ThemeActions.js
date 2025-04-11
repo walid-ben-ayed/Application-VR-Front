@@ -2,13 +2,14 @@ import { UiActions } from "../Slice/UiSlice";
 import axios from "axios";
 import { TOKEN } from "@/Constants";
 import { toast } from '@/components/core/toaster';
+import { API_BASE_URL } from '@/Constants';
 
 
 // 📌 Récupérer tous les thèmes
 export const fetchThemes = async (dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
-    const response = await axios.get("http://localhost:9090/api/themes", {
+    const response = await axios.get(`${API_BASE_URL}/api/themes`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -25,7 +26,7 @@ export const fetchThemes = async (dispatch) => {
 export const getThemeById = async (id, dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
-    const response = await axios.get(`http://localhost:9090/api/themes/${id}`, {
+    const response = await axios.get(`${API_BASE_URL}/api/themes/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -42,7 +43,7 @@ export const getThemeById = async (id, dispatch) => {
 export const deleteTheme = async (id, dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
-    await axios.delete(`http://localhost:9090/api/themes/${id}`, {
+    await axios.delete(`${API_BASE_URL}/api/themes/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -64,7 +65,7 @@ export const updateTheme = async (id, themeData, dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
     const response = await axios.put(
-      `http://localhost:9090/api/themes/${id}`,
+      `${API_BASE_URL}/api/themes/${id}`,
       {
         nom: themeData.nom,
         nomChampApplication: themeData.nomChampApplication,
@@ -94,7 +95,7 @@ export const addTheme = async (themeData, dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
     const response = await axios.post(
-      "http://localhost:9090/api/themes",
+      `${API_BASE_URL}/api/themes`,
       {
         nom: themeData.nom,
         nomChampApplication: themeData.nomChampApplication,
@@ -130,7 +131,7 @@ export const fetchThemesByChampApplication = async (champApplication, dispatch) 
       throw new Error("Token d'authentification manquant");
     }
 
-    const response = await axios.get(`http://localhost:9090/api/themes/champApplication/${champApplication}/themes`, {
+    const response = await axios.get(`${API_BASE_URL}/api/themes/champApplication/${champApplication}/themes`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

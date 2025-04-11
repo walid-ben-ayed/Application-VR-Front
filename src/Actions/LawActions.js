@@ -1,12 +1,12 @@
 
 import { UiActions } from "../Slice/UiSlice";
 import axios from 'axios';
-import { TOKEN } from "@/Constants";
+import { TOKEN, API_BASE_URL } from "@/Constants";
 
 export const fetchLois = async (dispatch) => {
     try {
       const token = localStorage.getItem(TOKEN);
-      const response = await axios.get('http://localhost:9090/api/loi', {
+      const response = await axios.get(`${API_BASE_URL}/api/loi`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -23,7 +23,7 @@ export const fetchLois = async (dispatch) => {
   export const getLawById = async (id, dispatch) => {
     try {
       const token = localStorage.getItem(TOKEN);
-      const response = await axios.get(`http://localhost:9090/api/loi/${id}`, {
+      const response = await axios.get(`${API_BASE_URL}/api/loi/${id}`, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Content-Type': 'application/json'
@@ -40,7 +40,7 @@ export const fetchLois = async (dispatch) => {
   export const deleteLaw = async (id, dispatch) => {
     try {
         const token = localStorage.getItem(TOKEN);
-        await axios.delete(`http://localhost:9090/api/loi/${id}`, {
+        await axios.delete(`${API_BASE_URL}/api/loi/${id}`, {
             headers: {
                 'Authorization': `Bearer ${token}`,
                 'Content-Type': 'application/json'
@@ -57,7 +57,7 @@ export const fetchLois = async (dispatch) => {
   export const updateLaw = async (id, lawData, dispatch) => {
     try {
       const token = localStorage.getItem(TOKEN);
-      const response = await axios.put(`http://localhost:9090/api/loi/${id}`, {
+      const response = await axios.put(`${API_BASE_URL}/api/loi/${id}`, {
         nom: lawData.nomLoi,
         type: lawData.type,
         numero: parseInt(lawData.numLoi),
@@ -88,7 +88,7 @@ export const addLaw = async (lawData, dispatch) => {
   try {
     console.log(lawData);
     const token = localStorage.getItem(TOKEN);
-    const response = await axios.post('http://localhost:9090/api/loi', {
+    const response = await axios.post(`${API_BASE_URL}/api/loi`, {
       nom: lawData.nomLoi,
       type: lawData.type,
       numero: parseInt(lawData.numLoi),

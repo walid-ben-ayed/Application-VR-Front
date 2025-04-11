@@ -30,6 +30,7 @@ export function Page() {
   const loadData = async () => {
     try {
       const data = await fetchChampApplications(dispatch);
+      console.log("data",data);
       setChampApplications(data);
       setLoading(false);
     } catch (error) {

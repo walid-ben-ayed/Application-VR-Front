@@ -2,13 +2,15 @@ import { UiActions } from "../Slice/UiSlice";
 import axios from 'axios';
 import { TOKEN } from "@/Constants";
 import { toast } from '@/components/core/toaster';
+import { API_BASE_URL } from '@/Constants';
+
 
 export const fetchTexteReglementaire = async (dispatch, page = 0, size = 5, searchTerm = '') => {
   try {
     const token = localStorage.getItem(TOKEN);
     
     // Construire l'URL avec les paramètres de requête
-    let url = `http://localhost:9090/api/texteReglementaire?page=${page}&size=${size}`;
+    let url = `${API_BASE_URL}/api/texteReglementaire?page=${page}&size=${size}`;
     
     // Ajouter le paramètre de recherche s'il existe
     if (searchTerm && searchTerm.trim() !== '') {
@@ -32,7 +34,7 @@ export const fetchTexteReglementaire = async (dispatch, page = 0, size = 5, sear
 export const getTexteReglementaireById = async (id, dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
-    const response = await axios.get(`http://localhost:9090/api/texteReglementaire/${id}`, {
+    const response = await axios.get(`${API_BASE_URL}/api/texteReglementaire/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'
@@ -50,7 +52,7 @@ export const filterTexteReglementaire = async (dispatch, page = 0, size = 5, cha
       const token = localStorage.getItem(TOKEN);
 
       // Construire l'URL avec les paramètres de requête
-      let url = `http://localhost:9090/api/texteReglementaire/filter?page=${page}&size=${size}`;
+      let url = `${API_BASE_URL}/api/texteReglementaire/filter?page=${page}&size=${size}`;
 
       // Ajouter les paramètres de filtre s'ils existent
       if (champApplication && champApplication.trim() !== '') {
@@ -83,7 +85,7 @@ export const filterTexteReglementaire = async (dispatch, page = 0, size = 5, cha
 export const deleteTexteReglementaire = async (id, dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
-    const response = await axios.delete(`http://localhost:9090/api/texteReglementaire/${id}`, {
+    const response = await axios.delete(`${API_BASE_URL}/api/texteReglementaire/${id}`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'  
@@ -104,7 +106,7 @@ export const deleteTexteReglementaire = async (id, dispatch) => {
 export const updateTexteReglementaire = async (id, data, dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
-    const response = await axios.put(`http://localhost:9090/api/texteReglementaire/${id}`, {
+    const response = await axios.put(`${API_BASE_URL}/api/texteReglementaire/${id}`, {
       loiTitre: data.loiTitre,
       codeNom: data.codeNom,
       champApplication: data.champApplication,
@@ -136,7 +138,7 @@ export const updateTexteReglementaire = async (id, data, dispatch) => {
 export const addTexteReglementaire = async (data, dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
-    const response = await axios.post('http://localhost:9090/api/texteReglementaire', {
+    const response = await axios.post(`${API_BASE_URL}/api/texteReglementaire`, {
       loiTitre: data.loiTitre,
       codeNom: data.codeNom,
       champApplication: data.champApplication,
@@ -171,7 +173,7 @@ export const updateTexteReglementairePlus = async (id, data, dispatch) => {
   
   try {
     const token = localStorage.getItem(TOKEN);
-    const response = await axios.put(`http://localhost:9090/api/texteReglementaire/${id}/plus`, {
+    const response = await axios.put(`${API_BASE_URL}/api/texteReglementaire/${id}/plus`, {
       loiTitre: data.loiTitre,
       codeNom: data.codeNom,
       champApplication: data.champApplication,
@@ -219,7 +221,7 @@ export const getTexteReglementaireVersions = async (id, dispatch) => {
     }
     
     console.log(`Fetching versions for texte with ID: ${id}`);
-    const response = await axios.get(`http://localhost:9090/api/texteReglementaire/${id}/versions`, {
+    const response = await axios.get(`${API_BASE_URL}/api/texteReglementaire/${id}/versions`, {
       headers: {
         'Authorization': `Bearer ${token}`,
         'Content-Type': 'application/json'

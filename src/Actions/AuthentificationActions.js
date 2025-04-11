@@ -1,10 +1,16 @@
 import { UiActions } from "../Slice/UiSlice";
 import { AuthentificationActions } from '../Slice/AuthentificationSlice';
 import axios from 'axios';
+import { API_BASE_URL } from '../Constants';
+
+// Configuration d'Axios pour ignorer la vérification SSL
+const axiosInstance = axios.create({
+  httpsAgent: new (require('https').Agent)({ rejectUnauthorized: false })
+});
 
 export const Login = async (user,dispatch) => {
   try {
-    const response = await axios.post('http://localhost:9090/api/auth/login', {
+    const response = await axiosInstance.post(`${API_BASE_URL}/api/auth/login`, {
       email:user.email,
       password:user.password,
     });

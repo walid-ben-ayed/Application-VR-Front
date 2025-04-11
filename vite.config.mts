@@ -64,6 +64,10 @@ export default defineConfig({
         replacement: path.join(process.cwd(), 'src/$1'),
       },
     ],
+    dedupe: ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
+  },
+  optimizeDeps: {
+    include: ['@mui/material', '@mui/icons-material', '@emotion/react', '@emotion/styled'],
   },
   server: {
     port: 3000,

@@ -2,13 +2,15 @@ import { UiActions } from "../Slice/UiSlice";
 import axios from "axios";
 import { TOKEN } from "@/Constants";
 import { toast } from '@/components/core/toaster';
+import { API_BASE_URL } from '@/Constants';
+
 
 
 // 📌 Récupérer tous les champs d'application
 export const fetchChampApplications = async (dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
-    const response = await axios.get("http://localhost:9090/api/champ-application", {
+    const response = await axios.get(`${API_BASE_URL}/api/champ-application`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -25,7 +27,7 @@ export const fetchChampApplications = async (dispatch) => {
 export const getChampApplicationById = async (id, dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
-    const response = await axios.get(`http://localhost:9090/api/champ-application/${id}`, {
+    const response = await axios.get(`${API_BASE_URL}/api/champ-application/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -42,7 +44,7 @@ export const getChampApplicationById = async (id, dispatch) => {
 export const deleteChampApplication = async (id, dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
-    await axios.delete(`http://localhost:9090/api/champ-application/${id}`, {
+    await axios.delete(`${API_BASE_URL}/api/champ-application/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -62,7 +64,7 @@ export const deleteChampApplication = async (id, dispatch) => {
 export const updateChampApplication = async (id, champData, dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
-    const response = await axios.put(`http://localhost:9090/api/champ-application/${id}`, 
+    const response = await axios.put(`${API_BASE_URL}/api/champ-application/${id}`, 
       { nom: champData.nom }, 
       {
         headers: {
@@ -89,7 +91,7 @@ export const updateChampApplication = async (id, champData, dispatch) => {
 export const addChampApplication = async (champData, dispatch) => {
   try {
     const token = localStorage.getItem(TOKEN);
-    const response = await axios.post("http://localhost:9090/api/champ-application", 
+    const response = await axios.post(`${API_BASE_URL}/api/champ-application`, 
       { nom: champData.nom }, 
       {
         headers: {
